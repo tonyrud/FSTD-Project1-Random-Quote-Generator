@@ -3,13 +3,13 @@
 // event listener to respond to "Show another quote" button clicks
 // when user clicks anywhere on the button, the "printQuote" function is called
 
-//add 10 sec timer
-//random background
 
+/*------------------
+ Variables
+ -------------------*/
 
 const quote = document.getElementById('loadQuote'),
       quoteContainer = document.getElementById('quote-box'),
-      quoteTxt = document.getElementsByClassName('quote'),
       quotes = [
             {
                 quote: 'Somewhere, something incredible is waiting to be known.',
@@ -35,6 +35,10 @@ const quote = document.getElementById('loadQuote'),
                 quote: 'If a cluttered desk is a sign of a cluttered mind, of what, then, is an empty desk a sign?',
                 source: 'Albert Einstein',
                 tag: 'Humor'
+            }, {
+                quote: 'The earth has music for those who listen.',
+                source: 'Shakespeare',
+                tag: 'Poetry'
             }
         ];
 
@@ -53,32 +57,48 @@ quote.addEventListener("click", printQuote, false);
  -------------------*/
 
 //generate random number
-let generateRandomNum = function(num){
+let generateRandomArrayNum = function(num){
 
-    let randomNum = Math.floor(Math.random() * (num))
+    let randomNum = getRandomNum(quotesLength);
 
     if (!inArray(useArray, randomNum)) {
         //add to array if not there
         useArray.push(randomNum);
     } else {
         //generate a new random num if it's already in array
-        generateRandomNum(quotesLength);
+        generateRandomArrayNum(quotesLength);
     }
 };
 
 // test if current random number is in the array: return true or false
 function inArray(arr, val) {
-    //debugger
     return arr.some(function(arrVal) {
         return val === arrVal;
     });
-};
+}
 
+//creates random number when needed
+function getRandomNum(num) {
+    return Math.floor(Math.random() * (num));
+}
+
+//creates random background hex values
+function getHexValues() {
+    let hexArr = ['0','1','2','3','4','5','6','7','9','a','b','c','d','e','f'],
+        randomNum = getRandomNum(hexArr.length),
+        hexResult = hexArr[randomNum];
+    for(let i = 0; i < 5; i++) {
+
+        randomNum = getRandomNum(hexArr.length);
+        hexResult += hexArr[randomNum];
+    }
+    return "#" + hexResult;
+}
 
 //get random quote
 function getRandomQuote() {
 
-    generateRandomNum(quotesLength);
+    generateRandomArrayNum();
 
     //use last item added to the array
     let randomNum = useArray[useArray.length - 1];
@@ -86,38 +106,38 @@ function getRandomQuote() {
     //empty array if all items have been added
     if (useArray.length === quotesLength) {
         useArray = [];
+        console.log('Quotes reset');
     }
     return quotes[randomNum];
 }
 
 //create quote to print to DOM
 function printQuote() {
-    let randomQuote;
+    let randomQuote,
+        bgColorValues = getHexValues();
+
 
     quoteContainer.classList.remove("fadeIn");
 
+    //timer for animation classes
     setTimeout(function () {
-        // debugger
         randomQuote = (getRandomQuote());
         console.log('Quote: ' + randomQuote.quote);
         quoteContainer.innerHTML = html();
         setTimeout(function () {
             quoteContainer.classList.add("fadeIn");
+            document.body.style.backgroundColor = bgColorValues;
+            console.log('background color ' + bgColorValues);
         }, 50);
 
     }, 300);
-
-
-
-    //make call for a random quote
-    // let randomQuote = (getRandomQuote());
 
     //generate html as template literal
     let html = function () {
         let htmlString = `
           <p class="quote">${randomQuote.quote}</p>
           <p class="source">
-              ${randomQuote.source}`
+              ${randomQuote.source}`;
        
               if(randomQuote.citation) {
                 htmlString +=`<span class="citation">${randomQuote.citation}</span>`;
@@ -127,25 +147,16 @@ function printQuote() {
               }
 
               htmlString +=`<span class="tag"> ${randomQuote.tag} </span>
-          </p>`
+          </p>`;
 
               return htmlString;
-
-    }
-    // var html = `
-    //       <p class="quote">${randomQuote.quote}</p>
-    //       <p class="source">
-    //           ${randomQuote.source}
-    //           <span class="citation">${randomQuote.citation}</span>
-    //           <span class="year"> ${randomQuote.year} </span>
-    //       </p>
-    // `;
-    // quoteContainer.innerHTML = html();
+    };
 }
 
+//run a new quote every 7sec
 setInterval(function () {
     printQuote();
-}, 4000);
+}, 7000);
 
 //init quote on page load
 printQuote();
